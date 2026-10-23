@@ -231,6 +231,7 @@ def transactions():
     return render_template(
         "transactions.html", transactions=rows, categories=_categories(),
         selected_kind=kind, selected_category=category_id, start_value=start_value, end_value=end_value,
+        today=_today(),
     )
 
 
