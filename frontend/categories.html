@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Danh mục{% endblock %}
+{% block content %}
+<section class="page-heading"><span class="eyebrow">PHÂN LOẠI CỦA BẠN</span><h1>Danh mục</h1><p class="muted">Tạo các nhóm thu chi phù hợp với cách bạn quản lý tiền.</p></section>
+<section class="panel form-panel">
+  <div class="section-heading"><div><h2>Thêm danh mục</h2><p class="muted">Danh mục thuộc riêng tài khoản của bạn.</p></div></div>
+  <form method="post" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="name">Tên danh mục</label><input class="input" id="name" name="name" maxlength="80" placeholder="Ví dụ: Chăm sóc thú cưng" required></div>
+    <div class="field"><label for="kind">Loại</label><select class="input" id="kind" name="kind"><option value="expense">Chi tiêu</option><option value="income">Thu nhập</option></select></div>
+    <button class="button button-primary" type="submit">Thêm danh mục</button>
+  </form>
+</section>
+<section class="panel">
+  <div class="section-heading"><div><h2>Danh mục hiện có</h2><p class="muted">Đang dùng: {{ categories|length }} danh mục</p></div></div>
+  {% if categories %}<div class="category-list">{% for category in categories %}<article class="category-row">
+    <form method="post" action="{{ url_for('main.edit_category', category_id=category.id) }}" class="category-edit-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label class="visually-hidden" for="category-name-{{ category.id }}">Tên danh mục</label><input class="input" id="category-name-{{ category.id }}" name="name" value="{{ category.name }}" maxlength="80" required></div>
+      <div class="field"><label class="visually-hidden" for="category-kind-{{ category.id }}">Loại danh mục</label><select class="input" id="category-kind-{{ category.id }}" name="kind"><option value="expense" {{ 'selected' if category.kind == 'expense' }}>Chi tiêu</option><option value="income" {{ 'selected' if category.kind == 'income' }}>Thu nhập</option></select></div>
+      <span class="usage-note">{{ category.transactions|length }} giao dịch</span>
+      <button class="button button-secondary button-small" type="submit">Lưu</button>
+    </form>
+    <form method="post" action="{{ url_for('main.delete_category', category_id=category.id) }}" data-confirm="Xóa danh mục này? Danh mục đang được dùng sẽ không thể xóa.">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-quiet button-small danger-text" type="submit">Xóa</button>
+    </form>
+  </article>{% endfor %}</div>{% else %}<div class="empty-state compact-empty"><h3>Chưa có danh mục</h3><p>Thêm danh mục đầu tiên ở phía trên.</p></div>{% endif %}
+</section>
+{% endblock %}

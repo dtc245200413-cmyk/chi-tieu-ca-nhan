@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Báo cáo{% endblock %}
+{% block content %}
+<section class="page-heading"><span class="eyebrow">BỨC TRANH TÀI CHÍNH</span><h1>Báo cáo</h1><p class="muted">Xem tổng thu chi và nhóm danh mục trong một khoảng thời gian.</p></section>
+<section class="panel filter-panel"><form method="get" class="filter-grid report-filter">
+  <div class="field"><label for="start">Từ ngày</label><input class="input" id="start" type="date" name="start" value="{{ start_value }}" required></div>
+  <div class="field"><label for="end">Đến ngày</label><input class="input" id="end" type="date" name="end" value="{{ end_value }}" required></div>
+  <div class="filter-actions"><button class="button button-primary" type="submit">Xem báo cáo</button></div>
+</form></section>
+<section class="summary-grid report-summary">
+  <article class="summary-card summary-income"><div class="summary-label"><span class="summary-icon">↗</span> Tổng thu</div><div class="summary-value">{{ income|vnd }}</div></article>
+  <article class="summary-card summary-expense"><div class="summary-label"><span class="summary-icon">↘</span> Tổng chi</div><div class="summary-value">{{ expense|vnd }}</div></article>
+  <article class="summary-card summary-balance"><div class="summary-label"><span class="summary-icon">＝</span> Chênh lệch</div><div class="summary-value">{{ balance|vnd }}</div></article>
+</section>
+<section class="panel"><div class="section-heading"><div><h2>Theo danh mục</h2><p class="muted">So sánh quy mô các khoản trong khoảng đã chọn.</p></div></div>
+  {% if category_rows %}<div class="category-report-list">{% for row in category_rows %}<div class="category-report-row"><div class="report-row-heading"><span>{{ row.name }} <span class="tag tag-{{ row.kind }}">{{ 'Thu' if row.kind == 'income' else 'Chi' }}</span></span><strong class="amount-{{ row.kind }}">{{ row.amount|vnd }}</strong></div><div class="progress-track"><div class="progress-fill progress-{{ row.kind }}" style="width: {{ row.pct }}%"></div></div></div>{% endfor %}</div>{% else %}<div class="empty-state compact-empty"><h3>Chưa có dữ liệu trong khoảng này</h3><p>Thêm giao dịch hoặc chọn thời gian khác để xem báo cáo.</p></div>{% endif %}
+</section>
+{% endblock %}

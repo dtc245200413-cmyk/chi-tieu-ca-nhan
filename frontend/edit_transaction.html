@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Sửa giao dịch{% endblock %}
+{% block content %}
+<section class="page-heading"><span class="eyebrow">CẬP NHẬT SỔ</span><h1>Sửa giao dịch</h1><p class="muted">Chỉ bạn mới có thể chỉnh sửa giao dịch của mình.</p></section>
+<section class="panel form-panel narrow-panel">
+  <form method="post" class="form-grid transaction-form" data-category-select>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="kind">Loại giao dịch</label><select class="input kind-select" id="kind" name="kind" required><option value="expense" {{ 'selected' if transaction.kind == 'expense' }}>Chi tiêu</option><option value="income" {{ 'selected' if transaction.kind == 'income' }}>Thu nhập</option></select></div>
+    <div class="field"><label for="category_id">Danh mục</label><select class="input category-select" id="category_id" name="category_id" required>{% for category in categories %}<option value="{{ category.id }}" data-kind="{{ category.kind }}" {{ 'selected' if category.id == transaction.category_id }}>{{ category.name }} · {{ 'Thu' if category.kind == 'income' else 'Chi' }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="amount">Số tiền (₫)</label><input class="input" id="amount" name="amount" type="number" min="1" max="99999999999999" step="1" value="{{ transaction.amount|int }}" required></div>
+    <div class="field"><label for="happened_on">Ngày giao dịch</label><input class="input" id="happened_on" name="happened_on" type="date" value="{{ transaction.happened_on.isoformat() }}" required></div>
+    <div class="field field-wide"><label for="note">Ghi chú <span class="optional">(không bắt buộc)</span></label><input class="input" id="note" name="note" type="text" maxlength="500" value="{{ transaction.note }}"></div>
+    <div class="field-wide form-actions"><button class="button button-primary" type="submit">Lưu thay đổi</button><a class="button button-secondary" href="{{ url_for('main.transactions') }}">Hủy</a></div>
+  </form>
+</section>
+{% endblock %}

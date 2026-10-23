@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Tạo tài khoản{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-aside">
+    <span class="eyebrow">Bắt đầu miễn phí</span>
+    <h1>Một thói quen nhỏ. Một bức tranh rõ ràng.</h1>
+    <p>Tạo tài khoản để phân loại giao dịch và theo dõi dòng tiền theo cách của bạn.</p>
+    <div class="aside-note"><span class="aside-icon">₫</span> Hỗ trợ thu nhập, chi tiêu và báo cáo</div>
+  </div>
+  <div class="auth-card">
+    <h2>Tạo tài khoản</h2>
+    <p class="muted">Các danh mục cơ bản sẽ được tạo sẵn cho bạn.</p>
+    <form method="post" class="stack-form" novalidate>
+      {{ form.hidden_tag() }}
+      <label for="name">Tên hiển thị</label>
+      {{ form.name(id="name", class="input", autocomplete="name", placeholder="Tên của bạn") }}
+      {% for error in form.name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      <label for="email">Email</label>
+      {{ form.email(id="email", class="input", autocomplete="email", placeholder="ban@example.com") }}
+      {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      <label for="password">Mật khẩu</label>
+      {{ form.password(id="password", class="input", autocomplete="new-password", placeholder="Ít nhất 12 ký tự") }}
+      {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      <label for="confirm">Nhập lại mật khẩu</label>
+      {{ form.confirm(id="confirm", class="input", autocomplete="new-password", placeholder="Nhập lại mật khẩu") }}
+      {% for error in form.confirm.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      <button class="button button-primary button-wide" type="submit">Tạo tài khoản</button>
+    </form>
+    <p class="auth-switch">Đã có tài khoản? <a href="{{ url_for('main.login') }}">Đăng nhập</a></p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Giao dịch{% endblock %}
+{% block content %}
+<section class="page-heading heading-with-action"><div><span class="eyebrow">SỔ GIAO DỊCH</span><h1>Giao dịch</h1><p class="muted">Thêm khoản thu chi và lọc theo nhu cầu.</p></div><a class="button button-primary" href="#new-transaction">＋ Thêm giao dịch</a></section>
+
+<section class="panel filter-panel">
+  <form method="get" class="filter-grid">
+    <div class="field"><label for="filter-kind">Loại</label><select class="input" id="filter-kind" name="kind"><option value="">Tất cả</option><option value="income" {{ 'selected' if selected_kind == 'income' }}>Thu nhập</option><option value="expense" {{ 'selected' if selected_kind == 'expense' }}>Chi tiêu</option></select></div>
+    <div class="field"><label for="filter-category">Danh mục</label><select class="input" id="filter-category" name="category_id"><option value="">Tất cả danh mục</option>{% for category in categories %}<option value="{{ category.id }}" {{ 'selected' if selected_category|string == category.id|string }}>{{ category.name }} · {{ 'Thu' if category.kind == 'income' else 'Chi' }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="filter-start">Từ ngày</label><input class="input" type="date" id="filter-start" name="start" value="{{ start_value }}"></div>
+    <div class="field"><label for="filter-end">Đến ngày</label><input class="input" type="date" id="filter-end" name="end" value="{{ end_value }}"></div>
+    <div class="filter-actions"><button class="button button-secondary" type="submit">Lọc giao dịch</button><a class="text-link" href="{{ url_for('main.transactions') }}">Xóa lọc</a></div>
+  </form>
+</section>
+
+<section class="panel form-panel" id="new-transaction">
+  <div class="section-heading"><div><h2>Thêm giao dịch</h2><p class="muted">Số tiền được ghi nhận bằng đồng Việt Nam.</p></div></div>
+  <form method="post" action="{{ url_for('main.create_transaction') }}" class="form-grid transaction-form" data-category-select>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="kind">Loại giao dịch</label><select class="input kind-select" id="kind" name="kind" required><option value="expense">Chi tiêu</option><option value="income">Thu nhập</option></select></div>
+    <div class="field"><label for="category_id">Danh mục</label><select class="input category-select" id="category_id" name="category_id" required><option value="">Chọn danh mục</option>{% for category in categories %}<option value="{{ category.id }}" data-kind="{{ category.kind }}">{{ category.name }} · {{ 'Thu' if category.kind == 'income' else 'Chi' }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="amount">Số tiền (₫)</label><input class="input" id="amount" name="amount" type="number" min="1" max="99999999999999" step="1" inputmode="numeric" placeholder="Ví dụ: 150000" required></div>
+    <div class="field"><label for="happened_on">Ngày giao dịch</label><input class="input" id="happened_on" name="happened_on" type="date" value="{{ today.isoformat() }}" required></div>
+    <div class="field field-wide"><label for="note">Ghi chú <span class="optional">(không bắt buộc)</span></label><input class="input" id="note" name="note" type="text" maxlength="500" placeholder="Ví dụ: Ăn trưa cùng đồng nghiệp"></div>
+    <div class="field-wide form-actions"><button class="button button-primary" type="submit">Lưu giao dịch</button></div>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="section-heading"><div><h2>Danh sách giao dịch</h2><p class="muted">Hiển thị tối đa 500 khoản phù hợp bộ lọc.</p></div><span class="count-pill">{{ transactions|length }} khoản</span></div>
+  {% if transactions %}<div class="table-wrap"><table><thead><tr><th>Giao dịch</th><th>Loại</th><th>Danh mục</th><th>Ngày</th><th class="align-right">Số tiền</th><th></th></tr></thead><tbody>
+    {% for item in transactions %}<tr><td><span class="transaction-title">{{ item.note or item.category.name }}</span></td><td><span class="tag tag-{{ item.kind }}">{{ 'Thu nhập' if item.kind == 'income' else 'Chi tiêu' }}</span></td><td>{{ item.category.name }}</td><td>{{ item.happened_on.strftime('%d/%m/%Y') }}</td><td class="align-right amount-{{ item.kind }}">{{ '+' if item.kind == 'income' else '−' }}{{ item.amount|vnd }}</td><td class="row-actions"><a class="text-link" href="{{ url_for('main.edit_transaction', transaction_id=item.id) }}">Sửa</a><form method="post" action="{{ url_for('main.delete_transaction', transaction_id=item.id) }}" data-confirm="Bạn có chắc muốn xóa giao dịch này?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="text-button danger-text" type="submit">Xóa</button></form></td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<div class="empty-state compact-empty"><h3>Không tìm thấy giao dịch</h3><p>Thử đổi bộ lọc hoặc thêm khoản thu chi mới.</p></div>{% endif %}
+</section>
+{% endblock %}

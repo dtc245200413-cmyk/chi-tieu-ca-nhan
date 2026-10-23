@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Đăng nhập{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-aside">
+    <span class="eyebrow">Tài chính rõ ràng hơn</span>
+    <h1>Theo dõi tiền của bạn, từng ngày.</h1>
+    <p>Ghi lại thu chi, xem xu hướng theo tháng và giữ mọi thứ trong một cuốn sổ riêng tư.</p>
+    <div class="aside-note"><span class="aside-icon">✓</span> Dữ liệu được lưu riêng theo tài khoản</div>
+  </div>
+  <div class="auth-card">
+    <h2>Chào mừng trở lại</h2>
+    <p class="muted">Đăng nhập để xem sổ chi tiêu của bạn.</p>
+    <form method="post" class="stack-form" novalidate>
+      {{ form.hidden_tag() }}
+      <label for="email">Email</label>
+      {{ form.email(id="email", class="input", autocomplete="email", placeholder="ban@example.com") }}
+      {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      <label for="password">Mật khẩu</label>
+      {{ form.password(id="password", class="input", autocomplete="current-password", placeholder="Nhập mật khẩu") }}
+      {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      <button class="button button-primary button-wide" type="submit">Đăng nhập</button>
+    </form>
+    <p class="auth-switch">Chưa có tài khoản? <a href="{{ url_for('main.register') }}">Tạo tài khoản</a></p>
+  </div>
+</section>
+{% endblock %}

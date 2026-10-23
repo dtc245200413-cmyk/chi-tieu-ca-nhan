@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}Sổ Chi Tiêu{% endblock %} · Sổ Chi Tiêu</title>
+  <link rel="stylesheet" href="{{ url_for('css_assets', filename='style.css') }}">
+  <script src="{{ url_for('js_assets', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('main.index') if current_user.is_authenticated else url_for('main.login') }}">
+      <span class="brand-mark">₫</span><span>Sổ Chi Tiêu</span>
+    </a>
+    {% if current_user.is_authenticated %}
+      <nav class="main-nav" aria-label="Điều hướng chính">
+        <a href="{{ url_for('main.index') }}">Tổng quan</a>
+        <a href="{{ url_for('main.transactions') }}">Giao dịch</a>
+        <a href="{{ url_for('main.categories') }}">Danh mục</a>
+        <a href="{{ url_for('main.reports') }}">Báo cáo</a>
+      </nav>
+      <div class="user-menu">
+        <span class="user-name">{{ current_user.name }}</span>
+        <form method="post" action="{{ url_for('main.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="button button-quiet button-small" type="submit">Đăng xuất</button>
+        </form>
+      </div>
+    {% else %}
+      <nav class="main-nav"><a href="{{ url_for('main.login') }}">Đăng nhập</a><a href="{{ url_for('main.register') }}">Tạo tài khoản</a></nav>
+    {% endif %}
+  </header>
+
+  <main class="page-shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<div class="flash-stack" aria-live="polite">
+        {% for category, message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}
+      </div>{% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">Sổ Chi Tiêu <span>·</span> Quản lý tài chính cá nhân</footer>
+</body>
+</html>
