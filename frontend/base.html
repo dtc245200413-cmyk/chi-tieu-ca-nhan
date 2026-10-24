@@ -14,11 +14,14 @@
       <span class="brand-mark">₫</span><span>Sổ Chi Tiêu</span>
     </a>
     {% if current_user.is_authenticated %}
+      {% set active_endpoint = request.endpoint or '' %}
+      {% set transaction_endpoints = ['main.transactions', 'main.create_transaction', 'main.edit_transaction', 'main.delete_transaction'] %}
+      {% set category_endpoints = ['main.categories', 'main.edit_category', 'main.delete_category'] %}
       <nav class="main-nav" aria-label="Điều hướng chính">
-        <a href="{{ url_for('main.index') }}">Tổng quan</a>
-        <a href="{{ url_for('main.transactions') }}">Giao dịch</a>
-        <a href="{{ url_for('main.categories') }}">Danh mục</a>
-        <a href="{{ url_for('main.reports') }}">Báo cáo</a>
+        <a href="{{ url_for('main.index') }}" class="{{ 'active' if active_endpoint == 'main.index' else '' }}" {% if active_endpoint == 'main.index' %}aria-current="page"{% endif %}>Tổng quan</a>
+        <a href="{{ url_for('main.transactions') }}" class="{{ 'active' if active_endpoint in transaction_endpoints else '' }}" {% if active_endpoint in transaction_endpoints %}aria-current="page"{% endif %}>Giao dịch</a>
+        <a href="{{ url_for('main.categories') }}" class="{{ 'active' if active_endpoint in category_endpoints else '' }}" {% if active_endpoint in category_endpoints %}aria-current="page"{% endif %}>Danh mục</a>
+        <a href="{{ url_for('main.reports') }}" class="{{ 'active' if active_endpoint == 'main.reports' else '' }}" {% if active_endpoint == 'main.reports' %}aria-current="page"{% endif %}>Báo cáo</a>
       </nav>
       <div class="user-menu">
         <span class="user-name">{{ current_user.name }}</span>

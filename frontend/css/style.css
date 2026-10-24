@@ -27,6 +27,7 @@ button, input, select { font: inherit; }
 .brand-mark { display: grid; place-items: center; height: 34px; width: 34px; border-radius: 11px; color: white; background: var(--green); font-size: 20px; font-weight: 650; }
 .main-nav { display: flex; align-items: center; gap: 26px; flex: 1; }
 .main-nav a { color: #677471; font-size: 14px; font-weight: 550; }
+.main-nav a.active { color: var(--green-dark); font-weight: 750; }
 .main-nav a:hover { color: var(--green-dark); }
 .user-menu { display: flex; align-items: center; gap: 15px; margin-left: auto; }
 .user-name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 650; }
