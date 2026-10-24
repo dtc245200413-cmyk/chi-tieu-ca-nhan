@@ -101,6 +101,9 @@ def test_navigation_marks_the_current_section(client):
         assert response.status_code == 200
         assert response.data.count(b"aria-current=\"page\"") == 1
         assert label.encode() in response.data
+    stylesheet = client.get("/css/style.css")
+    assert b'.main-nav a[aria-current="page"]' in stylesheet.data
+    assert b"font-weight: 800" in stylesheet.data
 
 
 def test_transaction_create_filter_edit_delete_and_reports(client, app):
@@ -222,6 +225,41 @@ def test_user_data_is_isolated(client, app):
     register_and_login(second, "second@example.com", "Second User")
     assert b"private-first-user-note" not in second.get("/transactions").data
     assert second.get(f"/transactions/{transaction_id}/edit").status_code == 404
+
+
+def test_demo_data_is_scoped_idempotent_and_removable(client, app):
+    register_and_login(client)
+    assert "Tạo dữ liệu mẫu" in client.get("/").get_data(as_text=True)
+
+    assert client.post("/demo-data/create").status_code == 302
+    assert client.post("/demo-data/create").status_code == 302
+    with app.app_context():
+        user = User.query.filter_by(email="tester@example.com").one()
+        demo_rows = Transaction.query.filter_by(owner_id=user.id).filter(
+            Transaction.note.like("DEMO:%")
+        ).all()
+        assert len(demo_rows) == 18
+
+    dashboard = client.get("/").get_data(as_text=True)
+    assert "DEMO:" in dashboard
+    assert "Xóa dữ liệu mẫu" in dashboard
+    assert "15.000.000" in dashboard
+    report = client.get("/reports").get_data(as_text=True)
+    assert "15.000.000" in report and "1.930.000" in report
+
+    with app.app_context():
+        user = User.query.filter_by(email="tester@example.com").one()
+        expense = Category.query.filter_by(owner_id=user.id, kind="expense").first()
+        expense_id = expense.id
+    create_transaction(client, expense_id, "expense", 777, "real-user-entry")
+
+    assert client.post("/demo-data/delete").status_code == 302
+    with app.app_context():
+        user = User.query.filter_by(email="tester@example.com").one()
+        assert Transaction.query.filter_by(owner_id=user.id).filter(
+            Transaction.note.like("DEMO:%")
+        ).count() == 0
+        assert Transaction.query.filter_by(owner_id=user.id, note="real-user-entry").count() == 1
 
 
 def test_invalid_report_dates_render_safely(client):

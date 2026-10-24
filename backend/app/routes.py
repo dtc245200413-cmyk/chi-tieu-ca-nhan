@@ -16,6 +16,7 @@ main = Blueprint("main", __name__)
 logger = logging.getLogger(__name__)
 TRANSACTION_KINDS = {"income", "expense"}
 MAX_AMOUNT = Decimal("99999999999999")
+DEMO_NOTE_PREFIX = "DEMO:"
 DEFAULT_CATEGORIES = {
     "income": ("Lương", "Thưởng", "Đầu tư", "Thu nhập khác"),
     "expense": ("Ăn uống", "Di chuyển", "Nhà ở", "Hóa đơn", "Mua sắm", "Sức khỏe", "Giải trí", "Khác"),
@@ -192,7 +193,88 @@ def index():
         overall_balance=total_income - total_expense,
         months=months,
         recent=recent,
+        has_demo_data=Transaction.query.filter_by(owner_id=current_user.id)
+        .filter(Transaction.note.like(f"{DEMO_NOTE_PREFIX}%")).first() is not None,
     )
+
+
+@main.post("/demo-data/create")
+@login_required
+def create_demo_data():
+    demo_query = Transaction.query.filter_by(owner_id=current_user.id).filter(
+        Transaction.note.like(f"{DEMO_NOTE_PREFIX}%")
+    )
+    if demo_query.first() is not None:
+        flash("Tài khoản đã có dữ liệu mẫu.", "info")
+        return redirect(url_for("main.index"))
+
+    income_categories = Category.query.filter_by(
+        owner_id=current_user.id, kind="income"
+    ).order_by(Category.id).all()
+    expense_categories = Category.query.filter_by(
+        owner_id=current_user.id, kind="expense"
+    ).order_by(Category.id).all()
+    if not income_categories or not expense_categories:
+        flash("Hãy tạo ít nhất một danh mục thu và một danh mục chi trước.", "error")
+        return redirect(url_for("main.index"))
+
+    today = _today()
+    sample_rows = []
+    for offset in reversed(range(6)):
+        month_index = today.year * 12 + today.month - 1 - offset
+        year, month_zero = divmod(month_index, 12)
+        month = month_zero + 1
+        current_month = offset == 0
+        dates = (
+            date(year, month, 1),
+            date(year, month, min(8, today.day) if current_month else 8),
+            date(year, month, min(20, today.day) if current_month else 20),
+        )
+        sample_rows.extend((
+            Transaction(
+                owner_id=current_user.id,
+                category_id=income_categories[offset % len(income_categories)].id,
+                kind="income",
+                amount=Decimal("15000000") + Decimal(offset * 150000),
+                happened_on=dates[0],
+                note=f"{DEMO_NOTE_PREFIX} Thu nhập mô phỏng {year}-{month:02d}",
+            ),
+            Transaction(
+                owner_id=current_user.id,
+                category_id=expense_categories[offset % len(expense_categories)].id,
+                kind="expense",
+                amount=Decimal("1250000") + Decimal(offset * 20000),
+                happened_on=dates[1],
+                note=f"{DEMO_NOTE_PREFIX} Sinh hoạt {year}-{month:02d}",
+            ),
+            Transaction(
+                owner_id=current_user.id,
+                category_id=expense_categories[(offset + 1) % len(expense_categories)].id,
+                kind="expense",
+                amount=Decimal("680000") + Decimal(offset * 10000),
+                happened_on=dates[2],
+                note=f"{DEMO_NOTE_PREFIX} Mua sắm {year}-{month:02d}",
+            ),
+        ))
+
+    db.session.add_all(sample_rows)
+    db.session.commit()
+    flash("Đã tạo 18 giao dịch mẫu trong 6 tháng. Bạn có thể xóa bất cứ lúc nào.", "success")
+    return redirect(url_for("main.index"))
+
+
+@main.post("/demo-data/delete")
+@login_required
+def delete_demo_data():
+    deleted = (Transaction.query.filter_by(owner_id=current_user.id)
+               .filter(Transaction.note.like(f"{DEMO_NOTE_PREFIX}%"))
+               .delete(synchronize_session=False))
+    db.session.commit()
+    if deleted:
+        flash(f"Đã xóa {deleted} giao dịch mẫu.", "success")
+    else:
+        flash("Tài khoản không có giao dịch mẫu để xóa.", "info")
+    return redirect(url_for("main.index"))
 
 
 @main.get("/transactions")

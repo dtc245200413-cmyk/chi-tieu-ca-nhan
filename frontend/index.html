@@ -3,7 +3,17 @@
 {% block content %}
 <section class="page-heading heading-with-action">
   <div><span class="eyebrow">TỔNG QUAN</span><h1>Chào {{ current_user.name }},</h1><p class="muted">Đây là bức tranh tài chính của bạn trong tháng này.</p></div>
-  <a class="button button-primary" href="{{ url_for('main.transactions') }}#new-transaction">＋ Thêm giao dịch</a>
+  <div class="dashboard-actions">
+    <div class="dashboard-actions-row">
+      <a class="button button-primary" href="{{ url_for('main.transactions') }}#new-transaction">＋ Thêm giao dịch</a>
+      {% if has_demo_data %}
+        <form class="demo-data-form" method="post" action="{{ url_for('main.delete_demo_data') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-secondary" type="submit">Xóa dữ liệu mẫu</button></form>
+      {% else %}
+        <form class="demo-data-form" method="post" action="{{ url_for('main.create_demo_data') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-secondary" type="submit">Tạo dữ liệu mẫu</button></form>
+      {% endif %}
+    </div>
+    <span class="dashboard-actions-help">Tạo 18 giao dịch giả lập; chỉ hiển thị trong tài khoản này.</span>
+  </div>
 </section>
 
 <section class="summary-grid" aria-label="Tóm tắt tài chính">
