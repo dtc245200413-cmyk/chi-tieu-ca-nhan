@@ -25,7 +25,12 @@ def app():
     test_app = create_app(TestConfig)
     with test_app.app_context():
         db.create_all()
-        yield test_app
+
+    # Keep the app context out of the yield: otherwise Flask-Login's cached
+    # ``current_user`` in ``g`` can survive between separate test requests.
+    yield test_app
+
+    with test_app.app_context():
         db.session.remove()
         db.drop_all()
 
